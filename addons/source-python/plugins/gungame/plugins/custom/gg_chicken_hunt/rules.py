@@ -7,7 +7,6 @@
 # =============================================================================
 # GunGame
 from gungame.core.rules.instance import GunGameRules
-from gungame.core.rules.strings import rules_translations
 
 # Plugin
 from .info import info
@@ -17,3 +16,4 @@ from .info import info
 # >> RULES
 # =============================================================================
 chicken_hunt_rules = GunGameRules(info.name)
+chicken_hunt_rules.register_all_rules()
