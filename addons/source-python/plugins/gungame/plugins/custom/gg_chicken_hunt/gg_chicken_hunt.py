@@ -13,9 +13,10 @@ from listeners import OnLevelInit
 # GunGame
 from gungame.core.players.attributes import AttributePreHook
 from gungame.core.players.dictionary import player_dictionary
+from gungame.core.weapons.groups import all_grenade_weapons, melee_weapons
 
 # Plugin
-from .configuration import max_chickens
+from .configuration import allow_knife_kills, allow_nade_kills, max_chickens
 
 
 # =============================================================================
@@ -45,17 +46,18 @@ def _level_on_chicken_kill(game_event):
         return
     player = player_dictionary[game_event['attacker']]
     weapon = game_event['weapon']
-    # TODO: allow knife kills
-    # if weapon in knife_weapons:
-    #     if not allow_knife_kills.get_bool():
-    #         return
-    # TODO: allow nade kills
-    # elif weapon in nade_weapons:
-    #     if not allow_nade_kills.get_bool():
-    #         return
-    # elif game_event['weapon'] != player.level_weapon:
-    if weapon != player.level_weapon:
+
+    if weapon in all_grenade_weapons:
+        if not allow_nade_kills.get_bool():
+            return
+
+    elif weapon in melee_weapons:
+        if not allow_knife_kills.get_bool():
+            return
+
+    elif weapon != player.level_weapon:
         return
+
     _allow_level = True
     player.increase_level(1, reason='chicken')
     _allow_level = False
