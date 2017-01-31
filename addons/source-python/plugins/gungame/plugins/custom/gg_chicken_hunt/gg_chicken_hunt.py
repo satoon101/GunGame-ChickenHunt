@@ -13,6 +13,7 @@ from listeners import OnLevelInit
 # GunGame
 from gungame.core.players.attributes import AttributePreHook
 from gungame.core.players.dictionary import player_dictionary
+from gungame.core.status import GunGameMatchStatus, GunGameStatus
 from gungame.core.weapons.groups import all_grenade_weapons, melee_weapons
 
 # Plugin
@@ -42,6 +43,9 @@ def _pre_level_change(player, value):
 def _level_on_chicken_kill(game_event):
     """"""
     global _allow_level
+    if GunGameStatus.MATCH is not GunGameMatchStatus.ACTIVE:
+        return
+
     if game_event['othertype'] != 'chicken':
         return
     player = player_dictionary[game_event['attacker']]
