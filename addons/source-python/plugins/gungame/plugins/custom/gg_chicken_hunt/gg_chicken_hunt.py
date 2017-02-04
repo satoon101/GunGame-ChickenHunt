@@ -30,9 +30,9 @@ _allow_level = False
 # >> HOOKS
 # =============================================================================
 @AttributePreHook('level')
-def _pre_level_change(player, value):
+def _pre_level_change(player, attribute, new_value):
     """"""
-    if player.level < value and not _allow_level:
+    if player.level and player.level < new_value and not _allow_level:
         return False
 
 
