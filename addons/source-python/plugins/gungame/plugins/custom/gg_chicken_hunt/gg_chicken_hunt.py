@@ -34,7 +34,7 @@ _allow_level = False
 # =============================================================================
 @AttributePreHook('level')
 def _pre_level_change(player, attribute, new_value):
-    """"""
+    """Disable leveling if the player did not just kill a chicken."""
     if player.level and player.level < new_value and not _allow_level:
         return False
 
@@ -44,7 +44,7 @@ def _pre_level_change(player, attribute, new_value):
 # =============================================================================
 @Event('other_death')
 def _level_on_chicken_kill(game_event):
-    """"""
+    """Level the player if they killed a chicken."""
     global _allow_level
     if GunGameStatus.MATCH is not GunGameMatchStatus.ACTIVE:
         return
@@ -88,5 +88,6 @@ def _level_on_chicken_kill(game_event):
 # =============================================================================
 @OnLevelInit
 def load(map_name=None):
+    """Set the chickens for the map."""
     map_info = Entity.find_or_create('info_map_parameters')
     map_info.pet_population = max_chickens.get_int()
