@@ -9,12 +9,15 @@
 from entities.entity import Entity
 from events import Event
 from listeners import OnLevelInit
+from weapons.manager import weapon_manager
 
 # GunGame
 from gungame.core.players.attributes import AttributePreHook
 from gungame.core.players.dictionary import player_dictionary
 from gungame.core.status import GunGameMatchStatus, GunGameStatus
-from gungame.core.weapons.groups import all_grenade_weapons, melee_weapons
+from gungame.core.weapons.groups import (
+    all_grenade_weapons, incendiary_weapons, melee_weapons,
+)
 
 # Plugin
 from .configuration import allow_knife_kills, allow_nade_kills, max_chickens
@@ -48,19 +51,32 @@ def _level_on_chicken_kill(game_event):
 
     if game_event['othertype'] != 'chicken':
         return
-    player = player_dictionary[game_event['attacker']]
-    weapon = game_event['weapon']
 
-    if weapon in all_grenade_weapons:
-        if not allow_nade_kills.get_bool():
-            return
-
-    elif weapon in melee_weapons:
-        if not allow_knife_kills.get_bool():
-            return
-
-    elif weapon != player.level_weapon:
+    try:
+        player = player_dictionary[game_event['attacker']]
+    except ValueError:
         return
+
+    try:
+        weapon = weapon_manager[game_event['weapon']]
+    except:
+        return
+
+    weapon = weapon.basename
+    if weapon == 'molotov' and player.level_weapon in incendiary_weapons:
+        weapon = player.level_weapon
+
+    if weapon != player.level_weapon:
+        if weapon in all_grenade_weapons:
+            if not allow_nade_kills.get_bool():
+                return
+
+        elif weapon in melee_weapons:
+            if not allow_knife_kills.get_bool():
+                return
+
+        else:
+            return
 
     _allow_level = True
     player.increase_level(1, reason='chicken')
