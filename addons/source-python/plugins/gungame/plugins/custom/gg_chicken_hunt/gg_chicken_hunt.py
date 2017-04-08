@@ -24,9 +24,53 @@ from .configuration import allow_knife_kills, allow_nade_kills, max_chickens
 
 
 # =============================================================================
-# >> GLOBAL VARIABLES
+# >> CLASSES
 # =============================================================================
-_allow_level = False
+class _ChickenManager(object):
+    allow_level = False
+
+    def should_allow_level(self, player, level):
+        """Disable leveling if the player did not just kill a chicken."""
+        if player.level and player.level < level and self.allow_level:
+            return False
+        return None
+
+    def level_up_player(self, game_event):
+        """Level the player if they killed a chicken."""
+        if game_event['othertype'] != 'chicken':
+            return
+
+        try:
+            player = player_dictionary[game_event['attacker']]
+        except ValueError:
+            return
+
+        try:
+            weapon = weapon_manager[game_event['weapon']]
+        except KeyError:
+            return
+
+        weapon = weapon.basename
+        if weapon == 'molotov' and player.level_weapon in incendiary_weapons:
+            weapon = player.level_weapon
+
+        if weapon != player.level_weapon:
+            if weapon in all_grenade_weapons:
+                if not allow_nade_kills.get_bool():
+                    return
+
+            elif weapon in melee_weapons:
+                if not allow_knife_kills.get_bool():
+                    return
+
+            else:
+                return
+
+        self.allow_level = True
+        player.increase_level(1, reason='chicken')
+        self.allow_level = False
+
+_chicken_manager = _ChickenManager()
 
 
 # =============================================================================
@@ -34,9 +78,10 @@ _allow_level = False
 # =============================================================================
 @AttributePreHook('level')
 def _pre_level_change(player, attribute, new_value):
-    """Disable leveling if the player did not just kill a chicken."""
-    if player.level and player.level < new_value and not _allow_level:
-        return False
+    return _chicken_manager.should_allow_level(
+        player=player,
+        level=new_value,
+    )
 
 
 # =============================================================================
@@ -44,43 +89,8 @@ def _pre_level_change(player, attribute, new_value):
 # =============================================================================
 @Event('other_death')
 def _level_on_chicken_kill(game_event):
-    """Level the player if they killed a chicken."""
-    global _allow_level
-    if GunGameStatus.MATCH is not GunGameMatchStatus.ACTIVE:
-        return
-
-    if game_event['othertype'] != 'chicken':
-        return
-
-    try:
-        player = player_dictionary[game_event['attacker']]
-    except ValueError:
-        return
-
-    try:
-        weapon = weapon_manager[game_event['weapon']]
-    except:
-        return
-
-    weapon = weapon.basename
-    if weapon == 'molotov' and player.level_weapon in incendiary_weapons:
-        weapon = player.level_weapon
-
-    if weapon != player.level_weapon:
-        if weapon in all_grenade_weapons:
-            if not allow_nade_kills.get_bool():
-                return
-
-        elif weapon in melee_weapons:
-            if not allow_knife_kills.get_bool():
-                return
-
-        else:
-            return
-
-    _allow_level = True
-    player.increase_level(1, reason='chicken')
-    _allow_level = False
+    if GunGameStatus.MATCH is GunGameMatchStatus.ACTIVE:
+        _chicken_manager.level_up_player(game_event=game_event)
 
 
 # =============================================================================
