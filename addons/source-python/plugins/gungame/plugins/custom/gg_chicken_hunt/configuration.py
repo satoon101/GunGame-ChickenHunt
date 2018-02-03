@@ -1,4 +1,4 @@
-# ../gungame/plugins/included/gg_chicken_hunt/configuration.py
+# ../gungame/plugins/custom/gg_chicken_hunt/configuration.py
 
 """Creates the gg_chicken_hunt configuration."""
 

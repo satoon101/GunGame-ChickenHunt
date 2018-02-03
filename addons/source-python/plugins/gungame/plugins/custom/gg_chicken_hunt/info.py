@@ -1,4 +1,4 @@
-# ../gungame/plugins/included/gg_chicken_hunt/info.py
+# ../gungame/plugins/custom/gg_chicken_hunt/info.py
 
 """Contains plugin information."""
 
