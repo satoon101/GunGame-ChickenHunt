@@ -26,7 +26,7 @@ from .configuration import allow_knife_kills, allow_nade_kills, max_chickens
 # =============================================================================
 # >> CLASSES
 # =============================================================================
-class _ChickenManager(object):
+class _ChickenManager:
     allow_level = False
 
     def should_allow_level(self, player, level):
@@ -69,6 +69,7 @@ class _ChickenManager(object):
         self.allow_level = True
         player.increase_level(1, reason='chicken')
         self.allow_level = False
+
 
 _chicken_manager = _ChickenManager()
 
